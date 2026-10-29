@@ -9,7 +9,6 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'surya2006a/suryasumeet-calculator'
-        NOTIFY_EMAIL = 'sumeetsurya.singh@iiitb.ac.in'
         REGISTRY_CREDS = 'dockerhub-creds'
     }
 
@@ -44,35 +43,39 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                bat 'docker build -t %DOCKER_IMAGE%:%BUILD_NUMBER% -t %DOCKER_IMAGE%:latest .'
+                bat '''
+                    wsl -d Ubuntu -- docker build -t %DOCKER_IMAGE%:%BUILD_NUMBER% -t %DOCKER_IMAGE%:latest -f /mnt/c/ProgramData/Jenkins/.jenkins/workspace/suryasumeet-calculator/Dockerfile /mnt/c/ProgramData/Jenkins/.jenkins/workspace/suryasumeet-calculator
+                '''
             }
         }
 
-     stage('Push') {
-    steps {
-        withCredentials([usernamePassword(
-            credentialsId: "${REGISTRY_CREDS}",
-            usernameVariable: 'DH_USER',
-            passwordVariable: 'DH_PASS'
-        )]) {
-            bat '''
-                echo %DH_PASS% | docker login -u "%DH_USER%" --password-stdin
-                if errorlevel 1 exit /b 1
-                docker push %DOCKER_IMAGE%:%BUILD_NUMBER%
-                if errorlevel 1 exit /b 1
-                docker push %DOCKER_IMAGE%:latest
-                if errorlevel 1 exit /b 1
-                docker logout
-            '''
+        stage('Push') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: "${REGISTRY_CREDS}",
+                    usernameVariable: 'DH_USER',
+                    passwordVariable: 'DH_PASS'
+                )]) {
+                    bat '''
+                        wsl -d Ubuntu -- bash -lc "echo '%DH_PASS%' | docker login -u '%DH_USER%' --password-stdin"
+                        if errorlevel 1 exit /b 1
+
+                        wsl -d Ubuntu -- docker push %DOCKER_IMAGE%:%BUILD_NUMBER%
+                        if errorlevel 1 exit /b 1
+
+                        wsl -d Ubuntu -- docker push %DOCKER_IMAGE%:latest
+                        if errorlevel 1 exit /b 1
+                    '''
+                }
+            }
         }
-    }
-}
+
         stage('Deploy') {
             steps {
                 bat '''
-                    set IMAGE_TAG=%BUILD_NUMBER%
-                    docker compose up -d --remove-orphans
-                    docker compose ps
+                    wsl -d Ubuntu -- bash -lc "cd /mnt/c/ProgramData/Jenkins/.jenkins/workspace/suryasumeet-calculator && docker compose up -d --remove-orphans && docker compose ps"
+                    if errorlevel 1 exit /b 1
+
                     powershell -NoProfile -Command "Start-Sleep -Seconds 15; try { $r = Invoke-WebRequest -Uri 'http://localhost:8083/actuator/health' -UseBasicParsing; if ($r.StatusCode -ne 200) { exit 1 }; Write-Host $r.Content } catch { Write-Error $_; exit 1 }"
                 '''
             }
