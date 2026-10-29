@@ -12,8 +12,8 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE = 'your-dockerhub-username/calculator-api'   // <-- change this
-        NOTIFY_EMAIL = 'your-email@example.com'                   // <-- change this
+        DOCKER_IMAGE = 'surya2006a/suryasumeet-calculator'  
+        NOTIFY_EMAIL = 'sumeetsurya.singh@iiitb.ac.in''             
         REGISTRY_CREDS = 'dockerhub-creds'                        // Jenkins credentials ID
     }
 
