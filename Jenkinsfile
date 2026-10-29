@@ -48,19 +48,25 @@ pipeline {
             }
         }
 
-        stage('Push') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: "${REGISTRY_CREDS}",
-                    usernameVariable: 'DH_USER',
-                    passwordVariable: 'DH_PASS'
-                )]) {
-                    bat '''
-                        docker login -u "%DH_USER%" --password-stdin
-                    '''
-                }
-            }
+      stage('Push') {
+    steps {
+        withCredentials([usernamePassword(
+            credentialsId: "${REGISTRY_CREDS}",
+            usernameVariable: 'DH_USER',
+            passwordVariable: 'DH_PASS'
+        )]) {
+            bat '''
+                echo %DH_PASS% | docker login -u "%DH_USER%" --password-stdin
+                if errorlevel 1 exit /b 1
+                docker push %DOCKER_IMAGE%:%BUILD_NUMBER%
+                if errorlevel 1 exit /b 1
+                docker push %DOCKER_IMAGE%:latest
+                if errorlevel 1 exit /b 1
+                docker logout
+            '''
         }
+    }
+}
 
         stage('Deploy') {
             steps {
