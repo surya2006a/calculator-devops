@@ -48,7 +48,7 @@ pipeline {
             }
         }
 
-      stage('Push') {
+     stage('Push') {
     steps {
         withCredentials([usernamePassword(
             credentialsId: "${REGISTRY_CREDS}",
@@ -67,7 +67,6 @@ pipeline {
         }
     }
 }
-
         stage('Deploy') {
             steps {
                 bat '''
