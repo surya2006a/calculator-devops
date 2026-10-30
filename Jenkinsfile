@@ -1,6 +1,7 @@
 
 pipeline {
     agent any
+
     
     environment {
         DOCKER_IMAGE = 'surya2006a/suryasumeet-calculator'
