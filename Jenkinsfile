@@ -5,7 +5,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'surya2006a/suryasumeet-calculator'
         REGISTRY_CREDS = 'dockerhub-creds'
-        NOTIFY_EMAIL = 'ruban.masih26@gmail.com'
+        NOTIFY_EMAIL = 'sumeet.surya.singh@gmail.com'
     }
 
     options {
