@@ -2,11 +2,6 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven3'
-        jdk 'JDK17'
-    }
-
     environment {
         DOCKER_IMAGE = 'surya2006a/suryasumeet-calculator'
         REGISTRY_CREDS = 'dockerhub-creds'
